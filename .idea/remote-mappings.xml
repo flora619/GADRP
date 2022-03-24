@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteMappingsManager">
+    <list>
+      <list>
+        <remote-mappings server-id="python@5e786efa-2b8a-4fac-a3e8-51fb333789e9" />
+        <remote-mappings server-id="python@sftp://wh@192.168.249.74:22/home/wh/miniconda3/envs/keras7/bin/python3.7" />
+        <remote-mappings server-id="python@sftp://wh@192.168.249.74:22/home/wh/miniconda3/envs/pytorch7/bin/python3" />
+      </list>
+    </list>
+  </component>
+</project>
