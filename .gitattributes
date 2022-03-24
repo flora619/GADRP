@@ -1,6 +1,1 @@
 .css linguist-language=Python
-data/cell_line/copynumber_461cell_23316dim.csv filter=lfs diff=lfs merge=lfs -text
-data/cell_line/CpG_407cell_69641dim.csv filter=lfs diff=lfs merge=lfs -text
-data/cell_line/RNAseq_462cell_48392dim.csv filter=lfs diff=lfs merge=lfs -text
-data/cell_line/cell_index.csv filter=lfs diff=lfs merge=lfs -text
-data/cell_line/miRNA_470cell_734dim.csv filter=lfs diff=lfs merge=lfs -text
