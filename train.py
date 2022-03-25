@@ -31,10 +31,10 @@ drug_cell_label_index_file = "/home/wh/python_file/gnnbased/data/pair/drug_cell_
 
 lr = 0.0001
 num_epoch =100
-batch_size =512
+batch_size =1024
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
-device = torch.device("cuda:2" if (torch.cuda.is_available()) else "cpu")
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+device = torch.device("cuda:1" if (torch.cuda.is_available()) else "cpu")
 
 def data_process():
     # load molecular substructure fingerprints of drugs
@@ -114,7 +114,7 @@ def training(model, drug_feature
 
 
 def main():
-    random.seed(3)
+    random.seed(1)
     fingerprint, \
     cell_index,RNAseq_feature, copynumber_feature, \
     edge_idx, drug_cell_label = data_process()
