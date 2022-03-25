@@ -18,5 +18,8 @@ Source code and data for "GADRP: Graph Neural Network and Autoencoder for Drug R
 ## Installation
 git clone https://github.com/flora619/GADRP
 ## Operation steps
-1. python cell_ae.py
-2. python train.py
+1. python drug.py
+2. python cell.py
+3. python drug_cell.py
+4. python cell_ae.py
+5. python train.py
