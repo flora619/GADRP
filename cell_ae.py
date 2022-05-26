@@ -17,7 +17,7 @@ cell_copynumber_file = "./data/cell_line/copynumber_461cell_23316dim.csv"
 cell_RNAseq_ae="./data/cell_line/cell_RNAseq400_ae.pt"
 cell_copynumber_ae="./data/cell_line/cell_copynumber400_ae.pt"
 device="cuda"
-os.environ["CUDA_VISIBLE_DEVICES"]="2"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 
 def train_ae(model,trainLoader,test_feature):
     start = datetime.datetime.now()
@@ -25,8 +25,7 @@ def train_ae(model,trainLoader,test_feature):
     loss_func = nn.MSELoss()
     best_model=model
     best_loss=100
-    for epoch in range(1, 2500 + 1 ):
-
+    for epoch in range(1, 5000 + 1 ):
         for x in trainLoader:
             y=x
             encoded, decoded = model(x)
@@ -87,9 +86,8 @@ def main():
     train = torch.tensor(train_list).float().to(device)
     test = torch.tensor(test_list).float().to(device)
     data_iter = Data.DataLoader(train, batch_size, shuffle=True)
-    train_ae(copynumber_ae, data_iter, test)
-    torch.save(copynumber_ae.output(copynumber_feature), cell_copynumber_ae)
-
+    best_model = train_ae(copynumber_ae, data_iter, test)
+    torch.save(best_model.output(copynumber_feature), cell_copynumber_ae)
 
 
 
