@@ -25,7 +25,7 @@ def train_ae(model,trainLoader,test_feature):
     loss_func = nn.MSELoss()
     best_model=model
     best_loss=100
-    for epoch in range(1, 5000 + 1 ):
+    for epoch in range(1, 2500 + 1 ):
         for x in trainLoader:
             y=x
             encoded, decoded = model(x)
