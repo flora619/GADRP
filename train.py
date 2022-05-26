@@ -6,6 +6,8 @@ import torch
 import pandas as pd
 from scipy.stats import pearsonr,spearmanr
 from sklearn.metrics import r2_score
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import MinMaxScaler
 from torch import nn
 
 from model.GADRP import GADRP_Net
@@ -26,16 +28,14 @@ cell_copynumber_ae = "./data/cell_line/cell_copynumber400_ae.pt"
 edge_idx_file="./data/pair/edge_idx_file.pt"
 
 # label
-drug_cell_label_index_file = "/home/wh/python_file/gnnbased/data/pair/drug_cell_label.pt"
-
+drug_cell_label_index_file = "./data/pair/drug_cell_label.pt"
 
 lr = 0.0001
-num_epoch =100
+num_epoch =130
 batch_size =1024
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 device = torch.device("cuda:1" if (torch.cuda.is_available()) else "cpu")
-
 def data_process():
     # load molecular substructure fingerprints of drugs
     fingerprint = pd.read_csv(drug_fingerprint_file, sep=',', header=0, index_col=[0])
@@ -49,30 +49,48 @@ def data_process():
     # load drug-cell line similarity matrix
     edge_idx=torch.load(edge_idx_file).to(device)
     drug_cell_label = torch.load(drug_cell_label_index_file).to(device)
-    # 对细胞系进行筛选
     return fingerprint, \
            list(cell_index.index), RNAseq_feature,copynumber_feature, \
-           edge_idx, drug_cell_label
+             edge_idx, drug_cell_label
 
 
-def split(drug_cell_label, cell_num, ratio=0.9):
+def split(drug_cell_label, cell_num):
     """
     :param drug_cell_label:
     :param cell_index:
-    :param ratio:
     :return:
     """
-    drug_cell_label = drug_cell_label.tolist()
-    drug_cell_label_train = []
-    drug_cell_label_test = []
-    for cell in range(cell_num):
-        drug_subcell_label = [item for item in drug_cell_label if item[0] == cell]
-        train_list = random.sample(drug_subcell_label, int(ratio * len(drug_subcell_label)))
-        test_list = [item for item in drug_subcell_label if item not in train_list]
-        drug_cell_label_train += train_list
-        drug_cell_label_test += test_list
-    return torch.tensor(drug_cell_label_train).to(device), torch.tensor(drug_cell_label_test).to(device)
+    drug_cell_label = drug_cell_label
+    train_index1=torch.tensor([],dtype=torch.long).to(device)
+    train_index2 = torch.tensor([], dtype=torch.long).to(device)
+    train_index3 = torch.tensor([], dtype=torch.long).to(device)
+    train_index4 = torch.tensor([], dtype=torch.long).to(device)
+    train_index5 = torch.tensor([], dtype=torch.long).to(device)
 
+    text_index1 = torch.tensor([], dtype=torch.long).to(device)
+    text_index2 = torch.tensor([], dtype=torch.long).to(device)
+    text_index3 = torch.tensor([], dtype=torch.long).to(device)
+    text_index4 = torch.tensor([], dtype=torch.long).to(device)
+    text_index5 = torch.tensor([], dtype=torch.long).to(device)
+    for cell in range(cell_num):
+        drug_subcell_label_index = torch.where(drug_cell_label[:,0]==cell)[0]
+        drug_subcell_label_index=drug_subcell_label_index[torch.randperm(drug_subcell_label_index.size(0))]
+        i1,i2,i3,i4,i5=drug_subcell_label_index.chunk(5,0)
+        train_index1=torch.cat((train_index1,i2,i3,i4,i5),0)
+        train_index2 = torch.cat((train_index2, i1, i3, i4, i5), 0)
+        train_index3 = torch.cat((train_index3, i2, i1, i4, i5), 0)
+        train_index4 = torch.cat((train_index4, i2, i3, i1, i5), 0)
+        train_index5 = torch.cat((train_index5, i2, i3, i4, i1), 0)
+
+        text_index1 = torch.cat((text_index1, i1), 0)
+        text_index2 = torch.cat((text_index2, i2), 0)
+        text_index3 = torch.cat((text_index3, i3), 0)
+        text_index4 = torch.cat((text_index4, i4), 0)
+        text_index5 = torch.cat((text_index5, i5), 0)
+
+    train_index=[train_index1,train_index2,train_index3,train_index4,train_index5]
+    test_index=[text_index1,text_index2,text_index3,text_index4,text_index5]
+    return train_index,test_index
 
 
 def training(model, drug_feature
@@ -88,6 +106,7 @@ def training(model, drug_feature
     best_test_loss = torch.tensor(100)
 
     for epoch in range(1, num_epoch + 1):
+        model.train()
         batch = 0
         for X, y in data_iter:
             y_pre= model(drug_feature, cell_feature1, cell_feature2,
@@ -98,7 +117,9 @@ def training(model, drug_feature
             optimizer.step()
             train_ls.append(l)
             batch += 1
+        model.eval()
         with torch.no_grad():
+
             end = datetime.datetime.now()
             y_pre= model(drug_feature, cell_feature1, cell_feature2,
                          edge_idx, features_test)
@@ -114,7 +135,7 @@ def training(model, drug_feature
 
 
 def main():
-    random.seed(1)
+    random.seed(2)
     fingerprint, \
     cell_index,RNAseq_feature, copynumber_feature, \
     edge_idx, drug_cell_label = data_process()
@@ -122,23 +143,26 @@ def main():
 
 
     # Stratified sampling
-    drug_cell_label_train, drug_cell_label_test = split(drug_cell_label, len(cell_index))
-    print("train set", len(drug_cell_label_train))  # 221092
-    print("test set", len(drug_cell_label_test))  # 24749
+    train_index_all, test_index_all=split(drug_cell_label,cell_num=388)
 
+    for i in range(5):
+        train_index=train_index_all[i]
+        test_index=test_index_all[i]
+        print("train set", len(train_index))
+        print("test set", len(test_index))
 
-    features = drug_cell_label_train[:, :2]
-    labels = drug_cell_label_train[:, 2]
-    features_test = drug_cell_label_test[:, :2]
-    labels_test = drug_cell_label_test[:, 2]
-    dataset = Data.TensorDataset(features, labels)
+        features = drug_cell_label[train_index, :2]
+        labels = drug_cell_label[train_index, 2]
+        features_test = drug_cell_label[test_index, :2]
+        labels_test = drug_cell_label[test_index, 2]
+        dataset = Data.TensorDataset(features, labels)
 
+        data_iter = Data.DataLoader(dataset, batch_size, shuffle=True)
+        model = GADRP_Net(device).to(device)
+        training(model, fingerprint
+                 , copynumber_feature,RNAseq_feature,
+                 edge_idx, data_iter, features_test, labels_test)
 
-    data_iter = Data.DataLoader(dataset, batch_size, shuffle=True)
-    model = GADRP_Net(device).to(device)
-    training(model, fingerprint
-             , copynumber_feature,RNAseq_feature,
-             edge_idx, data_iter, features_test, labels_test)
 
 
 if __name__ == '__main__':
