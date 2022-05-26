@@ -1,3 +1,4 @@
+import os
 
 import numpy as np
 
@@ -14,7 +15,8 @@ cell_CpG_file = '../data/cell_line/CpG_407cell_69641dim.csv'
 cell_id_file="../data/cell_line/cell_index.csv"
 cell_sim_file="../data/cell_line/cell_sim.pt"
 cell_sim_top10_file="../data/cell_line/cell_sim_top10.pt"
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+device = torch.device("cuda:3" if (torch.cuda.is_available()) else "cpu")
 
 
 def main():
@@ -23,7 +25,6 @@ def main():
     :return:
     """
     use_cuda = torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
 
     #load microRNA expression data, DNA methylation data of cell line
     miRNA_feature = pd.read_csv(cell_miRNA_file, sep=',', header=None, index_col=[0])
