@@ -31,7 +31,7 @@ edge_idx_file="./data/pair/edge_idx_file.pt"
 drug_cell_label_index_file = "./data/pair/drug_cell_label.pt"
 
 lr = 0.0001
-num_epoch =130
+num_epoch =150
 batch_size =1024
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
