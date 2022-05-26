@@ -17,7 +17,7 @@ cell_copynumber_file = "./data/cell_line/copynumber_461cell_23316dim.csv"
 cell_RNAseq_ae="./data/cell_line/cell_RNAseq400_ae.pt"
 cell_copynumber_ae="./data/cell_line/cell_copynumber400_ae.pt"
 device="cuda"
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 def train_ae(model,trainLoader,test_feature):
     start = datetime.datetime.now()
@@ -70,7 +70,7 @@ def main():
     print(copynumber_indim)
 
     # dimension reduction(gene expression data)
-    RNAseq_ae = Auto_Encoder(RNAseq_indim, 400)
+    RNAseq_ae = Auto_Encoder(device,RNAseq_indim, 400)
     train_list = random.sample((RNAseq_feature).tolist(), int(0.9 * len(RNAseq_feature)))
     test_list = [item for item in (RNAseq_feature).tolist() if item not in train_list]
     train=torch.tensor(train_list).float().to(device)
@@ -80,7 +80,7 @@ def main():
     torch.save(best_model.output(RNAseq_feature),cell_RNAseq_ae)
 
     # dimension reduction(DNA copy number data)
-    copynumber_ae = Auto_Encoder(copynumber_indim, 400)
+    copynumber_ae = Auto_Encoder(device,copynumber_indim, 400)
     train_list = random.sample((copynumber_feature).tolist(), int(0.9 * len(copynumber_feature)))
     test_list = [item for item in (copynumber_feature).tolist() if item not in train_list]
     train = torch.tensor(train_list).float().to(device)
