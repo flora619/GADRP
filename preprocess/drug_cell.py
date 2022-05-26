@@ -135,9 +135,6 @@ def main():
     temp = np.log10(temp.astype(float))
     drug_cell_label["ic50"] = temp
 
-    import matplotlib.pyplot as plt
-    plt.hist(drug_cell_label["ic50"], range=[-10, 10], bins=1000, histtype="bar")
-    plt.show()
 
     drug_cell_label = drug_cell_label.sort_values(by=["ic50"])
 
