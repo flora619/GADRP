@@ -1,12 +1,10 @@
 import os
 import torch.nn as nn
-device="cuda"
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
 class Auto_Encoder(nn.Module):
-    def __init__(self, indim, outdim=400):
+    def __init__(self, device,indim, outdim=400):
         super(Auto_Encoder, self).__init__()
-        self.encoder = Encoder(indim,outdim)
-        self.decoder = Decoder(indim, outdim)
+        self.encoder = Encoder(device=device,indim=indim,outdim=outdim)
+        self.decoder = Decoder(device=device,outdim=indim,indim= outdim)
     def forward(self, x):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
@@ -16,7 +14,7 @@ class Auto_Encoder(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, indim, outdim=400):
+    def __init__(self,device, indim, outdim=400):
         super(Encoder, self).__init__()
         self.linear1 = nn.Linear(indim, 2048,device=device)
         self.linear2 = nn.Linear(2048, 1024,device=device)
@@ -29,7 +27,7 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self,outdim, indim=400):
+    def __init__(self,device,outdim, indim=400):
         super(Decoder, self).__init__()
         self.linear3 = nn.Linear(indim, 1024,device=device)
         self.linear2 = nn.Linear(1024,2048,device=device)
