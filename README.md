@@ -26,7 +26,7 @@ Source code and data for "GADRP: graph convolutional networks and autoencoders f
 1. Install dependencies, including torch1.9, sklearn, numpy and pandas
 2. run drug.py and cell.py to generate drug and cell line similarity matrices
 3. run drug_cell.py to generate drug cell line pair similarity matrix
-6. run cell_ae.py to generate low-dimensional representations of cell line omics characteristics
-7. run python train.py for training and prediction
+4. run cell_ae.py to generate low-dimensional representations of cell line omics characteristics
+5. run python train.py for training and prediction
 ## Installation
 git clone https://github.com/flora619/GADRP
